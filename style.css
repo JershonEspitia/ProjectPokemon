@@ -1,0 +1,45 @@
+body {
+    margin: 2% 2%;
+    background-color: black;
+    color: white;
+    font-family: 'Times New Roman', Times, serif;
+   
+}
+
+form {
+    margin: 5% 0%;
+    align-items: center;
+}
+
+.boton {
+    width: 100%;
+    height: auto;
+    margin: 2% 0%;
+}
+
+.container-form {
+    width: 60%;
+    margin-left: 20%;
+}
+
+h6 {
+    width: auto;
+}
+
+#type, #count{
+    width: 60%;
+    margin-left: 20%;
+    margin-bottom: 20px;
+    display: flexbox;
+}
+
+#type button {
+    margin: 5px 5px;
+    width: auto;
+    height: 50px;
+}
+
+.error-img {
+    width: 96px;
+    height: 96px;
+}
