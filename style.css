@@ -11,7 +11,7 @@ form {
     align-items: center;
 }
 
-.boton {
+.boton-card {
     width: 100%;
     /* height: auto; */
     margin: 2% 0%;
@@ -20,6 +20,11 @@ form {
 .container-form {
     width: 60%;
     margin-left: 20%;
+}
+
+.container {
+    padding: 30px;
+    border: 5px dashed #fffb00;
 }
 
 h6 {

@@ -1,17 +1,8 @@
-// Swal.fire({
-//     title: 'Sweet!',
-//     text: 'Modal with a custom image.',
-//     imageUrl: 'https://unsplash.it/400/200',
-//     imageWidth: 400,
-//     imageHeight: 200,
-//     imageAlt: 'Custom image',
-//   })
-
 // GLOBAL VARIABLES
 const URL = "https://pokeapi.co/api/v2";
-const endPokemon = "/pokemon?limit=100000&offset=0";
+const endPokemonAll = "/pokemon?limit=100000&offset=0";
+const endPokemon = "/pokemon/";
 const endType = "/type/";
-const limit = 1017;
 const myCount = document.querySelector("#count");
 const myButtons = document.querySelector("#type");
 const myButton = document.querySelector("#cards");
@@ -39,10 +30,82 @@ const typePokemons = [
 ];
 
 addEventListener("DOMContentLoaded", async () => {
+  searchPokemon();
+  resetPage();
   renderButtonsTypesPokemons();
   pokemonsDefault();
   callTypePokemons();
 });
+
+let searchPokemon = () => {
+  document.querySelector("#btn-submit").addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    const searchIdOName = document
+      .querySelector("#input-valor")
+      .value.toLowerCase()
+      .trim();
+    let res;
+
+    try {
+      res = await (await fetch(`${URL}${endPokemon}${searchIdOName}`)).json();
+
+      if (res) {
+        myButton.innerHTML = "";
+        myCount.innerHTML = "";
+
+        let div = document.createElement("DIV");
+        div.setAttribute("class", "col");
+
+        res.sprites.front_default
+          ? div.insertAdjacentHTML(
+              "beforeend",
+              `
+                  <button type="button" class="btn btn-light btn-outline-warning boton">
+                    <img src="${res.sprites.front_default}" class="img-fluid" alt="${res.name}">
+                    <div class="h6">${res.name}</div>
+                  </button>
+                    `
+            )
+          : div.insertAdjacentHTML(
+              "beforeend",
+              `
+                  <button type="button" class="btn btn-light btn-outline-warning">
+                    <img src="${errorImg}" class="img-fluid error-img" alt="${res.name}">
+                    <div class="h6">${res.name}</div>
+                  </button>
+                    `
+            );
+
+        myButton.append(div);
+      }
+    } catch (error) {
+      myButton.innerHTML = "";
+      myCount.innerHTML = "";
+
+      let div = document.createElement("DIV");
+      div.setAttribute("class", "col");
+
+      div.insertAdjacentHTML(
+        "beforeend",
+        `
+          <button type="button" class="btn btn-light btn-outline-warning">
+            <img src="${errorImg}" class="img-fluid error-img" alt="none">
+            <div class="h6">No encontrado</div>
+          </button>
+        `
+      );
+      myButton.append(div);
+    }
+  });
+};
+
+let resetPage = () => {
+  let buttonReset = document.querySelector("#btn-reset");
+  buttonReset.addEventListener("click", () => {
+    window.location.reload();
+  });
+};
 
 let renderButtonsTypesPokemons = () => {
   let id = 1;
@@ -61,35 +124,26 @@ let renderButtonsTypesPokemons = () => {
   });
 };
 
-let pokemonsDefault = async ()=>{
-  let res = await (await fetch(`${URL}${endPokemon}`)).json();
-  let list = res.results;
-  let limit = res.count;
-  renderPokemons(res, list, limit);
-}
-
-let renderPokemons = async (res_, list_, limit_) => {
-  let count = document.createElement("div");
-  let res = res_;
+let renderPokemons = async (list_, limit_) => {
+  let count = document.createElement("DIV");
   let list = list_;
   let limit = limit_;
-  // console.log("RES: ", res);
-  // console.log("LIST: ", list);
-  // console.log("LIMIT: ", limit);
-  let i = 1
+  let i = 1;
+  let listPokDetails = [];
 
   for (let pokemon of list) {
     let pokemonUrl = pokemon.url;
     let pokemonDetails = await (await fetch(pokemonUrl)).json();
+    listPokDetails.push(pokemonDetails);
 
-    let div = document.createElement("div");
+    let div = document.createElement("DIV");
     div.setAttribute("class", "col");
 
     pokemonDetails.sprites.front_default
       ? div.insertAdjacentHTML(
           "beforeend",
           `
-            <button type="button" class="btn btn-light btn-outline-warning boton">
+            <button type="button" class="btn btn-light btn-outline-warning boton-card">
               <img src="${pokemonDetails.sprites.front_default}" class="img-fluid" alt="${pokemonDetails.name}">
               <div class="h6">${pokemonDetails.name}</div>
             </button>
@@ -98,7 +152,7 @@ let renderPokemons = async (res_, list_, limit_) => {
       : div.insertAdjacentHTML(
           "beforeend",
           `
-            <button type="button" class="btn btn-light btn-outline-warning boton">
+            <button type="button" class="btn btn-light btn-outline-warning boton-card">
               <img src="${errorImg}" class="img-fluid error-img" alt="${pokemonDetails.name}">
               <div class="h6">${pokemonDetails.name}</div>
             </button>
@@ -107,13 +161,22 @@ let renderPokemons = async (res_, list_, limit_) => {
 
     myButton.append(div);
 
-    (i != limit) 
-    ? count.innerHTML = `<div class="h4">CARGANDO...</div><div class="h4">Total pokemones: ${i}</div>`
-    : count.innerHTML = `<div class="h4">Total pokemones: ${i}</div>`
+    i != limit
+      ? (count.innerHTML = `<div class="h4">CARGANDO...</div><div class="h4">Total pokemones: ${i}</div>`)
+      : (count.innerHTML = `<div class="h4">Total pokemones: ${i}</div>`);
 
     myCount.append(count);
-      i = i +1;
+    i = i + 1;
   }
+
+  infoPokemon(listPokDetails);
+};
+
+let pokemonsDefault = async () => {
+  let res = await (await fetch(`${URL}${endPokemonAll}`)).json();
+  let list = res.results;
+  let limit = res.count;
+  renderPokemons(list, limit);
 };
 
 let callTypePokemons = () => {
@@ -125,13 +188,35 @@ let callTypePokemons = () => {
       let res = await (await fetch(`${URL}${endType}${type}`)).json();
       let limit = 0;
 
-      res.pokemon.forEach(element => {
+      res.pokemon.forEach((element) => {
         arrayPokemons.push(element.pokemon);
         limit = limit + 1;
       });
       myCount.innerHTML = "";
       myButton.innerHTML = "";
-      renderPokemons(res, arrayPokemons, limit);
+      renderPokemons(arrayPokemons, limit);
     });
+  });
+};
+
+let infoPokemon = async (listPokDetails_) => {
+  let listPokDetails = listPokDetails_;
+  console.log(listPokDetails);
+  let buttonCard = document.querySelectorAll(".boton-card");
+
+  buttonCard.forEach((element) => {
+    let index = 0;
+    console.log(index);
+    element.addEventListener("click", async () => {
+      Swal.fire({
+        title: listPokDetails[index].name,
+        text: "Modal with a custom image.",
+        imageUrl: listPokDetails[index].sprites.front_default,
+        imageWidth: 300,
+        imageHeight: 300,
+        imageAlt: "Custom image",
+      });
+    });
+    index = index + 1;
   });
 };
