@@ -9,7 +9,7 @@
 
 // GLOBAL VARIABLES
 const URL = "https://pokeapi.co/api/v2";
-const endPokemon = "/pokemon/";
+const endPokemon = "/pokemon?limit=100000&offset=0";
 const endType = "/type/";
 const limit = 1017;
 const myCount = document.querySelector("#count");
@@ -40,7 +40,7 @@ const typePokemons = [
 
 addEventListener("DOMContentLoaded", async () => {
   renderButtonsTypesPokemons();
-  callPokemonsDef();
+  pokemonsDefault();
   callTypePokemons();
 });
 
@@ -61,21 +61,37 @@ let renderButtonsTypesPokemons = () => {
   });
 };
 
-let callPokemonsDef = async () => {
-  let count = document.createElement("div");
+let pokemonsDefault = async ()=>{
+  let res = await (await fetch(`${URL}${endPokemon}`)).json();
+  let list = res.results;
+  let limit = res.count;
+  renderPokemons(res, list, limit);
+}
 
-  for (let i = 1; i <= limit; i++) {
-    let res = await (await fetch(`${URL}${endPokemon}${i}`)).json();
+let renderPokemons = async (res_, list_, limit_) => {
+  let count = document.createElement("div");
+  let res = res_;
+  let list = list_;
+  let limit = limit_;
+  // console.log("RES: ", res);
+  // console.log("LIST: ", list);
+  // console.log("LIMIT: ", limit);
+  let i = 1
+
+  for (let pokemon of list) {
+    let pokemonUrl = pokemon.url;
+    let pokemonDetails = await (await fetch(pokemonUrl)).json();
+
     let div = document.createElement("div");
     div.setAttribute("class", "col");
 
-    res.sprites.front_default
+    pokemonDetails.sprites.front_default
       ? div.insertAdjacentHTML(
           "beforeend",
           `
             <button type="button" class="btn btn-light btn-outline-warning boton">
-              <img src="${res.sprites.front_default}" class="img-fluid" alt="${res.name}">
-              <div class="h6">${res.name}</div>
+              <img src="${pokemonDetails.sprites.front_default}" class="img-fluid" alt="${pokemonDetails.name}">
+              <div class="h6">${pokemonDetails.name}</div>
             </button>
               `
         )
@@ -83,16 +99,20 @@ let callPokemonsDef = async () => {
           "beforeend",
           `
             <button type="button" class="btn btn-light btn-outline-warning boton">
-              <img src="${errorImg}" class="img-fluid error-img" alt="${res.name}">
-              <div class="h6">${res.name}</div>
+              <img src="${errorImg}" class="img-fluid error-img" alt="${pokemonDetails.name}">
+              <div class="h6">${pokemonDetails.name}</div>
             </button>
               `
         );
 
     myButton.append(div);
 
-    count.innerHTML = `<div class="h4">Total pokemones: ${i}</div>`;
+    (i != limit) 
+    ? count.innerHTML = `<div class="h4">CARGANDO...</div><div class="h4">Total pokemones: ${i}</div>`
+    : count.innerHTML = `<div class="h4">Total pokemones: ${i}</div>`
+
     myCount.append(count);
+      i = i +1;
   }
 };
 
@@ -101,47 +121,17 @@ let callTypePokemons = () => {
   button.forEach((element) => {
     let type = element.getAttribute("id");
     element.addEventListener("click", async (e) => {
+      let arrayPokemons = [];
       let res = await (await fetch(`${URL}${endType}${type}`)).json();
-      console.log(res);
+      let limit = 0;
+
+      res.pokemon.forEach(element => {
+        arrayPokemons.push(element.pokemon);
+        limit = limit + 1;
+      });
       myCount.innerHTML = "";
       myButton.innerHTML = "";
-
-      let count = document.createElement("div");
-      let i = 1;
-
-      for (let pokemon of res.pokemon) {
-        let pokemonUrl = pokemon.pokemon.url;
-        let pokemonDetails = await (await fetch(pokemonUrl)).json();
-
-        let div = document.createElement("div");
-        div.setAttribute("class", "col");
-
-        pokemonDetails.sprites.front_default
-          ? div.insertAdjacentHTML(
-              "beforeend",
-              `
-                <button type="button" class="btn btn-light btn-outline-warning boton">
-                  <img src="${pokemonDetails.sprites.front_default}" class="img-fluid" alt="${pokemonDetails.name}">
-                  <div class="h6">${pokemonDetails.name}</div>
-                </button>
-                  `
-            )
-          : div.insertAdjacentHTML(
-              "beforeend",
-              `
-                <button type="button" class="btn btn-light btn-outline-warning boton">
-                  <img src="${errorImg}" class="img-fluid error-img" alt="${pokemonDetails.name}">
-                  <div class="h6">${pokemonDetails.name}</div>
-                </button>
-                  `
-            );
-
-        myButton.append(div);
-
-        count.innerHTML = `<div class="h4">Total pokemones: ${i}</div>`;
-        myCount.append(count);
-        i = i + 1;
-      }
+      renderPokemons(res, arrayPokemons, limit);
     });
   });
 };
