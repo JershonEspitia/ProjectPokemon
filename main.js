@@ -226,7 +226,7 @@ let infoPokemon = async (listPokDetails_) => {
     element.addEventListener("click", async () => {
       Swal.fire({
         title: listPokDetails[index].name,
-        imageUrl: listPokDetails[index].sprites.front_default,
+        imageUrl: (listPokDetails[index].sprites.front_default) ? listPokDetails[index].sprites.front_default : errorImg,
         html: `
           ${listPokDetails[index].stats
             .map(
