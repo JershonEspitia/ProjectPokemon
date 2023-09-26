@@ -61,7 +61,7 @@ let searchPokemon = () => {
           ? div.insertAdjacentHTML(
               "beforeend",
               `
-                  <button type="button" class="btn btn-light btn-outline-warning boton">
+                  <button type="button" class="btn btn-light btn-outline-warning boton-card">
                     <img src="${res.sprites.front_default}" class="img-fluid" alt="${res.name}">
                     <div class="h6">${res.name}</div>
                   </button>
@@ -78,6 +78,24 @@ let searchPokemon = () => {
             );
 
         myButton.append(div);
+
+        let buttonCard = document.querySelector(".boton-card");
+        buttonCard.addEventListener("click", async () => {
+          Swal.fire({
+            title: res.name,
+            imageUrl: res.sprites.front_default,
+            html: `
+              ${res.stats
+                .map(
+                  (data) =>
+                    `<input type="range" max="200" value="${data.base_stat}"><label><b>${data.base_stat}</b> ${data.stat.name} </label><br>`
+                )
+                .join("")}
+            `,
+            imageWidth: 300,
+            imageHeight: 300,
+          });
+        });
       }
     } catch (error) {
       myButton.innerHTML = "";
@@ -204,19 +222,22 @@ let infoPokemon = async (listPokDetails_) => {
   console.log(listPokDetails);
   let buttonCard = document.querySelectorAll(".boton-card");
 
-  buttonCard.forEach((element) => {
-    let index = 0;
-    console.log(index);
+  buttonCard.forEach((element, index) => {
     element.addEventListener("click", async () => {
       Swal.fire({
         title: listPokDetails[index].name,
-        text: "Modal with a custom image.",
         imageUrl: listPokDetails[index].sprites.front_default,
+        html: `
+          ${listPokDetails[index].stats
+            .map(
+              (data) =>
+                `<input type="range" max="200" value="${data.base_stat}"><label><b>${data.base_stat}</b> ${data.stat.name} </label><br>`
+            )
+            .join("")}
+        `,
         imageWidth: 300,
         imageHeight: 300,
-        imageAlt: "Custom image",
       });
     });
-    index = index + 1;
   });
 };
