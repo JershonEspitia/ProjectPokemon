@@ -37,10 +37,12 @@ addEventListener("DOMContentLoaded", async () => {
   callTypePokemons();
 });
 
-let searchPokemon = () => {
-  document.querySelector("#btn-submit").addEventListener("click", async (e) => {
-    e.preventDefault();
+document.querySelector("form").addEventListener("submit", (e) => {
+  e.preventDefault();
+});
 
+let searchPokemon = () => {
+  document.querySelector("#btn-submit").addEventListener("click", async () => {
     const searchIdOName = document
       .querySelector("#input-valor")
       .value.toLowerCase()
@@ -219,14 +221,15 @@ let callTypePokemons = () => {
 
 let infoPokemon = async (listPokDetails_) => {
   let listPokDetails = listPokDetails_;
-  console.log(listPokDetails);
   let buttonCard = document.querySelectorAll(".boton-card");
 
   buttonCard.forEach((element, index) => {
     element.addEventListener("click", async () => {
       Swal.fire({
         title: listPokDetails[index].name,
-        imageUrl: (listPokDetails[index].sprites.front_default) ? listPokDetails[index].sprites.front_default : errorImg,
+        imageUrl: listPokDetails[index].sprites.front_default
+          ? listPokDetails[index].sprites.front_default
+          : errorImg,
         html: `
           ${listPokDetails[index].stats
             .map(
