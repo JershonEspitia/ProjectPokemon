@@ -3,6 +3,10 @@ const URL = "https://pokeapi.co/api/v2";
 const endPokemonAll = "/pokemon?limit=100000&offset=0";
 const endPokemon = "/pokemon/";
 const endType = "/type/";
+
+const pokemonUriDB = "https://6509d046f6553137159c1074.mockapi.io";
+const endPokemonDB = "/pokemons/";
+
 const myCount = document.querySelector("#count");
 const myButtons = document.querySelector("#type");
 const myButton = document.querySelector("#cards");
@@ -63,7 +67,7 @@ let searchPokemon = () => {
           ? div.insertAdjacentHTML(
               "beforeend",
               `
-                  <button type="button" class="btn btn-light btn-outline-warning boton-card">
+                  <button id="${res.name}" type="button" class="btn btn-light btn-outline-warning boton-card">
                     <img src="${res.sprites.front_default}" class="img-fluid" alt="${res.name}">
                     <div class="h6">${res.name}</div>
                   </button>
@@ -72,7 +76,7 @@ let searchPokemon = () => {
           : div.insertAdjacentHTML(
               "beforeend",
               `
-                  <button type="button" class="btn btn-light btn-outline-warning">
+                  <button id="${res.name}" type="button" class="btn btn-light btn-outline-warning">
                     <img src="${errorImg}" class="img-fluid error-img" alt="${res.name}">
                     <div class="h6">${res.name}</div>
                   </button>
@@ -83,20 +87,56 @@ let searchPokemon = () => {
 
         let buttonCard = document.querySelector(".boton-card");
         buttonCard.addEventListener("click", async () => {
-          Swal.fire({
-            title: res.name,
-            imageUrl: res.sprites.front_default,
-            html: `
-              ${res.stats
-                .map(
-                  (data) =>
-                    `<input type="range" max="200" value="${data.base_stat}"><label><b>${data.base_stat}</b> ${data.stat.name} </label><br>`
-                )
-                .join("")}
-            `,
-            imageWidth: 300,
-            imageHeight: 300,
-          });
+
+          let existDB = await consultDB(buttonCard);
+
+          if (existDB) {
+
+            // showCancelButton: true,
+            // confirmButtonText: "Sí, eliminar",
+            // cancelButtonColor: '#d33',
+    
+            Swal.fire({
+              title: existDB.title,
+              imageUrl: existDB.imageUrl ? existDB.imageUrl : errorImg,
+              html: existDB.html,
+              imageWidth: 300,
+              imageHeight: 300,
+    
+              showConfirmButton: false,
+    
+              showCancelButton: true,
+              cancelButtonColor: '#9C0909',
+              cancelButtonText: "Cerrar",
+    
+            });
+          } else {
+            Swal.fire({
+              title: res.name,
+              imageUrl: res.sprites.front_default
+                ? res.sprites.front_default
+                : errorImg,
+              html: `
+                ${res.stats
+                  .map(
+                    (data) =>
+                      `<input type="range" max="200" value="${data.base_stat}"><label><b>${data.base_stat}</b> ${data.stat.name} </label><br>`
+                  )
+                  .join("")}
+              `,
+              imageWidth: 300,
+              imageHeight: 300,
+    
+              showConfirmButton: true,
+              confirmButtonColor: '#0006FF',
+              confirmButtonText: "Actualizar",
+    
+              showCancelButton: true,
+              cancelButtonColor: '#9C0909',
+              cancelButtonText: "Cerrar",
+            });
+          }
+
         });
       }
     } catch (error) {
@@ -163,7 +203,7 @@ let renderPokemons = async (list_, limit_) => {
       ? div.insertAdjacentHTML(
           "beforeend",
           `
-            <button type="button" class="btn btn-light btn-outline-warning boton-card">
+            <button id="${pokemonDetails.name}" type="button" class="btn btn-light btn-outline-warning boton-card">
               <img src="${pokemonDetails.sprites.front_default}" class="img-fluid" alt="${pokemonDetails.name}">
               <div class="h6">${pokemonDetails.name}</div>
             </button>
@@ -225,22 +265,72 @@ let infoPokemon = async (listPokDetails_) => {
 
   buttonCard.forEach((element, index) => {
     element.addEventListener("click", async () => {
-      Swal.fire({
-        title: listPokDetails[index].name,
-        imageUrl: listPokDetails[index].sprites.front_default
-          ? listPokDetails[index].sprites.front_default
-          : errorImg,
-        html: `
-          ${listPokDetails[index].stats
-            .map(
-              (data) =>
-                `<input type="range" max="200" value="${data.base_stat}"><label><b>${data.base_stat}</b> ${data.stat.name} </label><br>`
-            )
-            .join("")}
-        `,
-        imageWidth: 300,
-        imageHeight: 300,
-      });
+
+      let existDB = await consultDB(element);
+
+      if (existDB) {
+
+        // showCancelButton: true,
+        // confirmButtonText: "Sí, eliminar",
+        // cancelButtonColor: '#d33',
+
+        Swal.fire({
+          title: existDB.title,
+          imageUrl: existDB.imageUrl ? existDB.imageUrl : errorImg,
+          html: existDB.html,
+          imageWidth: 300,
+          imageHeight: 300,
+
+          showConfirmButton: false,
+
+          showCancelButton: true,
+          cancelButtonColor: '#9C0909',
+          cancelButtonText: "Cerrar",
+
+        });
+      } else {
+        Swal.fire({
+          title: listPokDetails[index].name,
+          imageUrl: listPokDetails[index].sprites.front_default
+            ? listPokDetails[index].sprites.front_default
+            : errorImg,
+          html: `
+            ${listPokDetails[index].stats
+              .map(
+                (data) =>
+                  `<input type="range" max="200" value="${data.base_stat}"><label><b>${data.base_stat}</b> ${data.stat.name} </label><br>`
+              )
+              .join("")}
+          `,
+          imageWidth: 300,
+          imageHeight: 300,
+
+          showConfirmButton: true,
+          confirmButtonColor: '#0006FF',
+          confirmButtonText: "Actualizar",
+
+          showCancelButton: true,
+          cancelButtonColor: '#9C0909',
+          cancelButtonText: "Cerrar",
+        });
+      }
     });
   });
+};
+
+let consultDB = async (element_) => {
+  let element = element_;
+  let id = element.getAttribute("id");
+  try {
+    let resDB = await (await fetch(`${pokemonUriDB}${endPokemonDB}`)).json();
+    let dataPokemon;
+    resDB.map((data) => {
+      if (data.title === id) {
+        dataPokemon = data;
+      }
+    });
+    return dataPokemon;
+  } catch (error) {
+    console.log("ERROR: ", error);
+  }
 };
