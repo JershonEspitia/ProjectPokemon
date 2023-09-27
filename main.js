@@ -313,6 +313,12 @@ let infoPokemon = async (listPokDetails_) => {
           cancelButtonColor: '#9C0909',
           cancelButtonText: "Cerrar",
         });
+        
+        let buttonUpdate = document.querySelector(".swal2-confirm");
+        console.log("buttonUpdate", buttonUpdate);
+        updateStats();
+        // updateDB();
+
       }
     });
   });
@@ -334,3 +340,22 @@ let consultDB = async (element_) => {
     console.log("ERROR: ", error);
   }
 };
+
+let updateStats = ()=>{
+  let containerStats = document.querySelector(".swal2-html-container");
+  containerStats.addEventListener("input", (e) => {
+    if (e.target.type === "range") {
+      const label = e.target.nextElementSibling; // Obtener el elemento de etiqueta siguiente al input
+      console.log(label);
+      label.innerHTML = `<b>${e.target.value}</b> ${label.textContent.split(' ')[1]}`;
+    }
+  });
+
+
+}
+
+// let updateDB = ()=>{
+//   let buttonUpdate = document.querySelector("swal2-confirm");
+//   console.log("buttonUpdate", buttonUpdate);
+
+// };
