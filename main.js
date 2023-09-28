@@ -5,7 +5,7 @@ const endPokemon = "/pokemon/";
 const endType = "/type/";
 
 const pokemonUriDB = "https://6509d046f6553137159c1074.mockapi.io";
-const endPokemonDB = "/pokemons/";
+const endPokemonDB = "/pokemons";
 
 const myCount = document.querySelector("#count");
 const myButtons = document.querySelector("#type");
@@ -32,6 +32,8 @@ const typePokemons = [
   "dark",
   "fairy",
 ];
+
+let listUpdateStats = null;
 
 addEventListener("DOMContentLoaded", async () => {
   searchPokemon();
@@ -136,7 +138,8 @@ let searchPokemon = () => {
               cancelButtonText: "Cerrar",
             });
           }
-
+          updateStats();
+          updateDB();
         });
       }
     } catch (error) {
@@ -269,6 +272,7 @@ let infoPokemon = async (listPokDetails_) => {
       let existDB = await consultDB(element);
 
       if (existDB) {
+        console.log("existDB.html", existDB.html);
 
         // showCancelButton: true,
         // confirmButtonText: "Sí, eliminar",
@@ -289,6 +293,8 @@ let infoPokemon = async (listPokDetails_) => {
 
         });
       } else {
+        console.log("SE EJECUTA ELSE EXISTDB");
+
         Swal.fire({
           title: listPokDetails[index].name,
           imageUrl: listPokDetails[index].sprites.front_default
@@ -313,12 +319,9 @@ let infoPokemon = async (listPokDetails_) => {
           cancelButtonColor: '#9C0909',
           cancelButtonText: "Cerrar",
         });
-        
-        let buttonUpdate = document.querySelector(".swal2-confirm");
-        console.log("buttonUpdate", buttonUpdate);
-        updateStats();
-        // updateDB();
 
+        updateStats();
+        updateDB();
       }
     });
   });
@@ -342,20 +345,74 @@ let consultDB = async (element_) => {
 };
 
 let updateStats = ()=>{
+  console.log("SE EJECUTA UPDATE STATS")
   let containerStats = document.querySelector(".swal2-html-container");
+
+  if (listUpdateStats === null) {
+    let updatedStats = [];
+    let inputRanges = document.querySelectorAll(".swal2-container input[type='range']");
+
+    inputRanges.forEach((inputRange) => {
+      let statValue = Number(inputRange.value);
+      let statName = inputRange.nextElementSibling.textContent.split(' ')[1];
+      updatedStats.push({ name: statName, value: statValue });
+    });
+
+    listUpdateStats = updatedStats;
+    console.log("listUpdateStats", listUpdateStats)
+  }
+  
   containerStats.addEventListener("input", (e) => {
+
+    let updatedStats = [];
+    let inputRanges = document.querySelectorAll(".swal2-container input[type='range']");
+
     if (e.target.type === "range") {
       const label = e.target.nextElementSibling; // Obtener el elemento de etiqueta siguiente al input
-      console.log(label);
       label.innerHTML = `<b>${e.target.value}</b> ${label.textContent.split(' ')[1]}`;
+
+      inputRanges.forEach((inputRange) => {
+        let statValue = Number(inputRange.value);
+        let statName = inputRange.nextElementSibling.textContent.split(' ')[1];
+        updatedStats.push({ name: statName, value: statValue });
+      });
     }
+    
+    listUpdateStats = updatedStats;
+    console.log("listUpdateStats", listUpdateStats)
+
   });
-
-
 }
 
-// let updateDB = ()=>{
-//   let buttonUpdate = document.querySelector("swal2-confirm");
-//   console.log("buttonUpdate", buttonUpdate);
+let updateDB = ()=>{  
+  console.log("SE EJECUTA UPDATE DB")
+  let buttonConfirm = document.querySelector(".swal2-confirm");
+  let title = document.querySelector(".swal2-title").textContent;
+  let imageUrl = document.querySelector(".swal2-image").getAttribute("src");
+  let html = {}
 
-// };
+  listUpdateStats.map((data)=>{
+    let {name, value} = data;
+    html[name] = value;
+  });
+
+  listUpdateStats = { title, imageUrl, html };
+
+  buttonConfirm.addEventListener("click", async()=>{
+
+    if (listUpdateStats) {
+      let config = {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          title: title,
+          imageUrl: imageUrl,
+          html: html
+        })
+      }
+      let res = await(await fetch(`${pokemonUriDB}${endPokemonDB}`, config)).json();
+      console.log(res)
+    }
+    
+  });
+};
