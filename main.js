@@ -90,14 +90,25 @@ let searchPokemon = () => {
           let existDB = await consultDB(buttonCard);
 
           if (existDB) {
+            
+            let html = "";
+
+            for (let i in existDB.html) {
+              console.log(i)
+              if (i != undefined) {
+                html += `<input type="range" max="200" value="${existDB.html[i]}"><label><b>${existDB.html[i]}</b> ${i} </label><br>`;
+              }
+            }
+            
             // showCancelButton: true,
             // confirmButtonText: "Sí, eliminar",
             // cancelButtonColor: '#d33',
 
+
             Swal.fire({
               title: existDB.title,
               imageUrl: existDB.imageUrl ? existDB.imageUrl : errorImg,
-              html: existDB.html,
+              html: `${html}`,
               imageWidth: 300,
               imageHeight: 300,
 
@@ -117,7 +128,7 @@ let searchPokemon = () => {
                 ${res.stats
                   .map(
                     (data) =>
-                      `<input type="range" max="200" value="${data.base_stat}"><label><b>${data.base_stat}</b> ${data.stat.name} </label><br>`
+                      `<input class="inputRange" type="range" max="200" value="${data.base_stat}"><label><b>${data.base_stat}</b> ${data.stat.name} </label><br>`
                   )
                   .join("")}
               `,
@@ -132,9 +143,11 @@ let searchPokemon = () => {
               cancelButtonColor: "#9C0909",
               cancelButtonText: "Cerrar",
             });
+
+            updateStats();
+            updateDB();
           }
-          updateStats();
-          updateDB();
+          
         });
       }
     } catch (error) {
