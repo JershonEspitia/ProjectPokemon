@@ -10,8 +10,11 @@ Este es un proyecto web simple que te permite buscar y explorar información sob
 - Exploración de diferentes tipos de Pokémon.
 - Visualización de detalles de cada Pokémon, incluyendo estadísticas.
 
+NOTA: Es importante esperar a que carguen todos los pokemones la primera vez que se abre la página, luego de que se carguen se pueden realizar las acciones.
+
 ## Capturas de Pantalla
 
+- Pagina 
 ![Captura de pantalla 1](./img/ss1.png)
 ![Captura de pantalla 2](./img/ss2.png)
 ![Captura de pantalla 3](./img/ss3.png)
@@ -24,6 +27,14 @@ Este es un proyecto web simple que te permite buscar y explorar información sob
 - JavaScript
 - [Bootstrap](https://getbootstrap.com/)
 - [SweetAlert2](https://sweetalert2.github.io/)
+
+## Base de datos
+
+https://6509d046f6553137159c1074.mockapi.io/pokemons
+
+Nota: Para buscar un pokemon específico registrado en la base de datos, se debe agregar el nombre al final de la url.
+
+Ejemplo: https://6509d046f6553137159c1074.mockapi.io/pokemons/pikachu
 
 ## Instalación
 
