@@ -33,8 +33,6 @@ const typePokemons = [
   "fairy",
 ];
 
-let listUpdateStats = null;
-
 addEventListener("DOMContentLoaded", async () => {
   searchPokemon();
   resetPage();
@@ -89,28 +87,25 @@ let searchPokemon = () => {
 
         let buttonCard = document.querySelector(".boton-card");
         buttonCard.addEventListener("click", async () => {
-
           let existDB = await consultDB(buttonCard);
 
           if (existDB) {
-
             // showCancelButton: true,
             // confirmButtonText: "Sí, eliminar",
             // cancelButtonColor: '#d33',
-    
+
             Swal.fire({
               title: existDB.title,
               imageUrl: existDB.imageUrl ? existDB.imageUrl : errorImg,
               html: existDB.html,
               imageWidth: 300,
               imageHeight: 300,
-    
+
               showConfirmButton: false,
-    
+
               showCancelButton: true,
-              cancelButtonColor: '#9C0909',
+              cancelButtonColor: "#9C0909",
               cancelButtonText: "Cerrar",
-    
             });
           } else {
             Swal.fire({
@@ -128,13 +123,13 @@ let searchPokemon = () => {
               `,
               imageWidth: 300,
               imageHeight: 300,
-    
+
               showConfirmButton: true,
-              confirmButtonColor: '#0006FF',
+              confirmButtonColor: "#0006FF",
               confirmButtonText: "Actualizar",
-    
+
               showCancelButton: true,
-              cancelButtonColor: '#9C0909',
+              cancelButtonColor: "#9C0909",
               cancelButtonText: "Cerrar",
             });
           }
@@ -268,7 +263,6 @@ let infoPokemon = async (listPokDetails_) => {
 
   buttonCard.forEach((element, index) => {
     element.addEventListener("click", async () => {
-
       let existDB = await consultDB(element);
 
       if (existDB) {
@@ -278,19 +272,27 @@ let infoPokemon = async (listPokDetails_) => {
         // confirmButtonText: "Sí, eliminar",
         // cancelButtonColor: '#d33',
 
+        let html = "";
+
+        for (let i in existDB.html) {
+          console.log(i)
+          if (i != undefined) {
+            html += `<input type="range" max="200" value="${existDB.html[i]}"><label><b>${existDB.html[i]}</b> ${i} </label><br>`;
+          }
+        }
+
         Swal.fire({
           title: existDB.title,
           imageUrl: existDB.imageUrl ? existDB.imageUrl : errorImg,
-          html: existDB.html,
+          html: `${html}`,
           imageWidth: 300,
           imageHeight: 300,
 
           showConfirmButton: false,
 
           showCancelButton: true,
-          cancelButtonColor: '#9C0909',
+          cancelButtonColor: "#9C0909",
           cancelButtonText: "Cerrar",
-
         });
       } else {
         console.log("SE EJECUTA ELSE EXISTDB");
@@ -304,7 +306,7 @@ let infoPokemon = async (listPokDetails_) => {
             ${listPokDetails[index].stats
               .map(
                 (data) =>
-                  `<input type="range" max="200" value="${data.base_stat}"><label><b>${data.base_stat}</b> ${data.stat.name} </label><br>`
+                  `<input class="inputRange" type="range" max="200" value="${data.base_stat}"><label><b>${data.base_stat}</b> ${data.stat.name} </label><br>`
               )
               .join("")}
           `,
@@ -312,11 +314,11 @@ let infoPokemon = async (listPokDetails_) => {
           imageHeight: 300,
 
           showConfirmButton: true,
-          confirmButtonColor: '#0006FF',
+          confirmButtonColor: "#0006FF",
           confirmButtonText: "Actualizar",
 
           showCancelButton: true,
-          cancelButtonColor: '#9C0909',
+          cancelButtonColor: "#9C0909",
           cancelButtonText: "Cerrar",
         });
 
@@ -344,75 +346,55 @@ let consultDB = async (element_) => {
   }
 };
 
-let updateStats = ()=>{
-  console.log("SE EJECUTA UPDATE STATS")
+let updateStats = () => {
   let containerStats = document.querySelector(".swal2-html-container");
 
-  if (listUpdateStats === null) {
+  containerStats.addEventListener("input", (e) => {
+    if (e.target.type === "range") {
+      const label = e.target.nextElementSibling; // Obtener el elemento de etiqueta siguiente al input
+      label.innerHTML = `<b>${e.target.value}</b> ${
+        label.textContent.split(" ")[1]
+      }`;
+    }
+  });
+};
+
+let updateDB = () => {
+  let buttonConfirm = document.querySelector(".swal2-confirm");
+  buttonConfirm.addEventListener("click", async () => {
+    let title = document.querySelector(".swal2-title").textContent;
+    let imageUrl = document.querySelector(".swal2-image").getAttribute("src");
+    let html = {};
+
     let updatedStats = [];
-    let inputRanges = document.querySelectorAll(".swal2-container input[type='range']");
+    let inputRanges = document.querySelectorAll(
+      ".inputRange"
+    );
 
     inputRanges.forEach((inputRange) => {
       let statValue = Number(inputRange.value);
-      let statName = inputRange.nextElementSibling.textContent.split(' ')[1];
+      let statName = inputRange.nextElementSibling.textContent.split(" ")[1];
       updatedStats.push({ name: statName, value: statValue });
     });
 
-    listUpdateStats = updatedStats;
-    console.log("listUpdateStats", listUpdateStats)
-  }
-  
-  containerStats.addEventListener("input", (e) => {
+    console.log("updatedStats", updatedStats);
 
-    let updatedStats = [];
-    let inputRanges = document.querySelectorAll(".swal2-container input[type='range']");
+    updatedStats.map((data) => {
+      let { name, value } = data;
+      html[name] = value;
+    });
 
-    if (e.target.type === "range") {
-      const label = e.target.nextElementSibling; // Obtener el elemento de etiqueta siguiente al input
-      label.innerHTML = `<b>${e.target.value}</b> ${label.textContent.split(' ')[1]}`;
-
-      inputRanges.forEach((inputRange) => {
-        let statValue = Number(inputRange.value);
-        let statName = inputRange.nextElementSibling.textContent.split(' ')[1];
-        updatedStats.push({ name: statName, value: statValue });
-      });
-    }
-    
-    listUpdateStats = updatedStats;
-    console.log("listUpdateStats", listUpdateStats)
-
-  });
-}
-
-let updateDB = ()=>{  
-  console.log("SE EJECUTA UPDATE DB")
-  let buttonConfirm = document.querySelector(".swal2-confirm");
-  let title = document.querySelector(".swal2-title").textContent;
-  let imageUrl = document.querySelector(".swal2-image").getAttribute("src");
-  let html = {}
-
-  listUpdateStats.map((data)=>{
-    let {name, value} = data;
-    html[name] = value;
-  });
-
-  listUpdateStats = { title, imageUrl, html };
-
-  buttonConfirm.addEventListener("click", async()=>{
-
-    if (listUpdateStats) {
-      let config = {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({
-          title: title,
-          imageUrl: imageUrl,
-          html: html
-        })
-      }
-      let res = await(await fetch(`${pokemonUriDB}${endPokemonDB}`, config)).json();
-      console.log(res)
-    }
-    
+    let config = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: title,
+        imageUrl: imageUrl,
+        html: html,
+      }),
+    };
+    let res = await (
+      await fetch(`${pokemonUriDB}${endPokemonDB}`, config)
+    ).json();
   });
 };
