@@ -1,0 +1,30 @@
+{
+  "pokemons": [
+    {
+      "title": "bulbasaur",
+      "imageUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
+      "html": {
+        "hp": 200,
+        "attack": 200,
+        "defense": 200,
+        "special-attack": 200,
+        "special-defense": 200,
+        "speed": 200
+      },
+      "id": 1
+    },
+    {
+      "title": "squirtle",
+      "imageUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png",
+      "html": {
+        "hp": 200,
+        "attack": 48,
+        "defense": 65,
+        "special-attack": 50,
+        "special-defense": 64,
+        "speed": 200
+      },
+      "id": 2
+    }
+  ]
+}

@@ -4,7 +4,7 @@ const endPokemonAll = "/pokemon?limit=100000&offset=0";
 const endPokemon = "/pokemon/";
 const endType = "/type/";
 
-const pokemonUriDB = "https://6509d046f6553137159c1074.mockapi.io";
+const pokemonUriDB = "http://127.0.0.1:5010";
 const endPokemonDB = "/pokemons";
 
 const myCount = document.querySelector("#count");
